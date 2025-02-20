@@ -64,12 +64,16 @@ impl Vmm {
 
     // Configure the vCPU and load a minimal guest program
     fn setup_vcpu(&mut self) -> Result<(), Box<dyn std::error::Error>> {
-        // Set up vCPU registers
+        // Set up segment registers (sregs)
         let mut sregs = self.vcpu.get_sregs()?;
         sregs.cs.base = 0;
         sregs.cs.selector = 0;
-        sregs.rip = 0x1000; // Point to start of guest memory
         self.vcpu.set_sregs(&sregs)?;
+
+        // Set up general-purpose registers (regs), including rip
+        let mut regs = self.vcpu.get_regs()?;
+        regs.rip = 0x1000; // Point to start of guest memory
+        self.vcpu.set_regs(&regs)?;
 
         // Load a tiny program: infinite loop (0xeb 0xfe = jmp $)
         let guest_code: &[u8] = &[0xeb, 0xfe];
@@ -132,14 +136,14 @@ impl Drop for Vmm {
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut vmm = Vmm::new()?;
-    vmm.setup_vcpu()?;
-    vmm.run()?;
+//    vmm.setup_vcpu()?;
+//    vmm.run()?;
     Ok(())
 }
 
 // Error handling boilerplate
-impl From<std::io::Error> for Box<dyn std::error::Error> {
-    fn from(err: std::io::Error) -> Self {
-        Box::new(err)
-    }
-}
+//impl From<std::io::Error> for Box<dyn std::error::Error> {
+//    fn from(err: std::io::Error) -> Self {
+//        Box::new(err)
+//    }
+//}
